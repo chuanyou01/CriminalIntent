@@ -16,6 +16,7 @@ public class CrimeLab {
 	private static CrimeLab sCrimeLab;
 	private Context mAppContext;
 	
+	
 	private ArrayList<Crime> mCrimes;
 	private CrimeLab( Context appContext) {
 		mAppContext = appContext;
