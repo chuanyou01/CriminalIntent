@@ -8,6 +8,8 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +28,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 //import android.widget.Checkable;
 import android.widget.CompoundButton;
@@ -32,13 +36,16 @@ import android.widget.EditText;
 
 public class CrimeFragment extends Fragment {
 	public static final String EXTRA_CRIME_ID = "com.chuan.criminalintent.crime_id";
+	private static final String TAG = "CrimeFragment";
 	private static final String DAILOG_DATE = "date";
 	private static final int REQUEST_DATE = 0;
 	private static final int REQUEST_TIME = 1;
+	private static final int REQUEST_PHOTO = 2;
 	private Crime mCrime;
 	private EditText mTitleFiled;
 	private Button mDateButton;
 	private CheckBox mSovledCheckBox;
+	private ImageButton mPhotoButton;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,15 +74,26 @@ public class CrimeFragment extends Fragment {
 		if (resultCode!=Activity.RESULT_OK) {
 			return;
 		}
-		if(requestCode==REQUEST_DATE){
+		switch (requestCode) {
+		case REQUEST_DATE:
 			Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
 			mCrime.setDate(date);
 			updateDate();
-		}
-		else if (requestCode==REQUEST_TIME) {
-			Date date = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
+			break;
+		case REQUEST_TIME:
+			date = (Date)data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
 			mCrime.setDate(date);
 			updateDate();
+			break;
+		case REQUEST_PHOTO:
+			String strFileName = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+			if (strFileName!=null) {
+				Log.i(TAG, "filename is " + strFileName);
+			}
+			break;
+
+		default:
+			break;
 		}
 	}
 	
@@ -157,6 +175,25 @@ public class CrimeFragment extends Fragment {
 				mCrime.setbSolved(arg1);			
 			}
 		});
+		
+		mPhotoButton = (ImageButton)v.findViewById(R.id.crime_imageButton);
+		mPhotoButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getActivity(), CrimeCameraActivity.class);
+				startActivityForResult(i, REQUEST_PHOTO);
+//				startActivity(i);
+			}
+		});
+		
+		PackageManager pm = getActivity().getPackageManager();
+		boolean hasCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
+				pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT) || 
+				Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD || 
+				Camera.getNumberOfCameras()>0;
+		if(!hasCamera){
+			mPhotoButton.setEnabled(false);
+		}
 		
 		return v;
 	}
