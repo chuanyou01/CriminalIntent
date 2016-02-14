@@ -9,6 +9,7 @@ import java.util.UUID;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.os.Build;
@@ -79,7 +80,6 @@ public class CrimeCameraFragment extends Fragment {
 		
 		Button takePicture = (Button)v.findViewById(R.id.crime_camera_takePictureButton);
 		takePicture.setOnClickListener(new OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
 				if (mCamera!=null) {
@@ -91,7 +91,7 @@ public class CrimeCameraFragment extends Fragment {
 		mSurfaceView = (SurfaceView)v.findViewById(R.id.crime_camera_surfaceView);
 		SurfaceHolder hoder = mSurfaceView.getHolder();
 		hoder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		hoder.addCallback(new Callback() {
+		hoder.addCallback(new Callback() {	
 			
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
@@ -118,6 +118,7 @@ public class CrimeCameraFragment extends Fragment {
 					return;
 				}
 				Camera.Parameters parameters = mCamera.getParameters();
+				
 				Size s= getBestSurpportSize(parameters.getSupportedPreviewSizes(), width, height);
 				parameters.setPreviewSize(s.width, s.height);
 				s = getBestSurpportSize(parameters.getSupportedPictureSizes(), width, height);
